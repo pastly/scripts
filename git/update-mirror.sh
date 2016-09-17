@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Super awesome script that keeps one remote repo in sync with another
 # Useful when development happens on one remote repo, but you want to
@@ -7,7 +7,7 @@
 # Optionally takes a directory to store a temporary local copy of the repo.
 # If unspecified, defaults to the current directory
 
-[[ "$#" < 2 ]] && echo "$0 from-repo to-repo [temp-dir]" && exit 0
+[[ "$#" < 2 ]] && echo "$0 from-repo to-repo [temp-dir]" && exit 1
 
 # Remote repository where active development happens
 FROM="$1"
