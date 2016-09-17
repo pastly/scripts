@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Super awesome script that keeps one remote repo in sync with another
 # Useful when development happens on one remote repo, but you want to
