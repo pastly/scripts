@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script just greps for lines that are not joins or parts, assuming _only_
+# joins and parts will have "***" in them
+
 [[ "$#" < "1" ]] && echo "$0 search-term [file.log ...]" && exit 1
 
 TERM="$1"
