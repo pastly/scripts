@@ -19,6 +19,7 @@ electrum-server $(cd /opt/electrum-server && git rev-parse HEAD | head -c 8) bui
 
 Estimated fees
 --------------
+$(printf "Within %2d blocks: $(bitcoin-cli estimatefee 2) btc/KB\n" 2)
 $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 6) btc/KB\n" 6)
 $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 12) btc/KB\n" 12)
 $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 24) btc/KB\n" 24)
