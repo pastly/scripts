@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# The output of this file is ment to be redirected into electrum.banner
+# Ex: update-electrum-banner > /etc/electrum.banner
+
+HEADER="/etc/electrum.banner.header"
+DONATION_ADDR="1MQS2nyvjFyqDjybiaz9KBdfxAFcsyDg87"
+
+cat $HEADER
+cat << EOF
+Banner last updated: $(date -u +'%d %b %Y %R')
+
+System
+------
+Intel NUC running $(uname -o) $(uname -r)
+8GB RAM, 240GB SSD, 50/50 Mbps
+$(bitcoind --version | head -n 1)
+electrum-server $(cd /opt/electrum-server && git rev-parse HEAD | head -c 8) built $(stat -c '%y' $(which electrum-server) | date -uf - +'%d %b %Y')
+
+Estimated fees
+--------------
+$(printf "Within %2d blocks: $(bitcoin-cli estimatefee 6) btc/KB\n" 6)
+$(printf "Within %2d blocks: $(bitcoin-cli estimatefee 12) btc/KB\n" 12)
+$(printf "Within %2d blocks: $(bitcoin-cli estimatefee 24) btc/KB\n" 24)
+
+Donation address: 1MQS2nyvjFyqDjybiaz9KBdfxAFcsyDg87
+or go to Help > Donate to server
+
+Contact: Matt Traudt <sirmatt@ksu.edu> 0x94FBBB0A
+Freenode, OFTC, Github: pastly
+https://system33.pw https://matt.traudt.xyz
+
+EOF
