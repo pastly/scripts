@@ -23,7 +23,7 @@ $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 6) btc/KB\n" 6)
 $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 12) btc/KB\n" 12)
 $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 24) btc/KB\n" 24)
 
-Donation address: 1MQS2nyvjFyqDjybiaz9KBdfxAFcsyDg87
+Donation address: $DONATION_ADDR
 or go to Help > Donate to server
 
 Contact: Matt Traudt <sirmatt@ksu.edu> 0x94FBBB0A
