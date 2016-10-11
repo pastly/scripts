@@ -5,6 +5,12 @@
 
 HEADER="/etc/electrum.banner.header"
 DONATION_ADDR="1MQS2nyvjFyqDjybiaz9KBdfxAFcsyDg87"
+ELECTRUM_LOG="/var/log/electrum.log"
+BITCOIN_DATADIR="/home/bitcoin/.bitcoin"
+ELECTRUM_DATADIR="/home/bitcoin/electrum-server"
+
+# How to get num of sent tx:
+# grep "sent tx" $ELECTRUM_LOG | wc -l
 
 cat $HEADER
 cat << EOF
@@ -22,7 +28,15 @@ Estimated fees
 $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 2) btc/KB\n" 2)
 $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 6) btc/KB\n" 6)
 $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 12) btc/KB\n" 12)
-$(printf "Within %2d blocks: $(bitcoin-cli estimatefee 24) btc/KB\n" 24)
+$(printf "Within %2d blocks: $(bitcoin-cli estimatefee 25) btc/KB\n" 25)
+
+Stats
+-----
+Total connections:     $(printf "%4d" $(grep TCP $ELECTRUM_LOG | grep -vE "thread|server" | wc -l))
+"Current" connections: $(printf "%4d" $(electrum-server numsessions))
+"Current" peers:       $(printf "%4d" $(electrum-server numpeers))
+bitcoind data:         $(printf "%4s" $(du -sh $BITCOIN_DATADIR | cut -f 1))
+electrum-server data:  $(printf "%4s" $(du -sh $ELECTRUM_DATADIR | cut -f 1))
 
 Donation address: $DONATION_ADDR
 or go to Help > Donate to server
@@ -30,9 +44,5 @@ or go to Help > Donate to server
 Contact: Matt Traudt <sirmatt@ksu.edu> 0x94FBBB0A
 Freenode, OFTC, Github: pastly
 https://system33.pw https://matt.traudt.xyz
-
-Total connections:   $(printf "%4d" $(grep TCP /var/log/electrum.log | grep -vE "thread|server" | wc -l))
-Current connections: $(printf "%4d" $(electrum-server numsessions))
-Current peers:       $(printf "%4d" $(electrum-server numpeers))
 
 EOF
