@@ -31,4 +31,8 @@ Contact: Matt Traudt <sirmatt@ksu.edu> 0x94FBBB0A
 Freenode, OFTC, Github: pastly
 https://system33.pw https://matt.traudt.xyz
 
+Total connections:   $(printf "%4d" $(grep TCP /var/log/electrum.log | grep -vE "thread|server" | wc -l))
+Current connections: $(printf "%4d" $(electrum-server numsessions))
+Current peers:       $(printf "%4d" $(electrum-server numpeers))
+
 EOF
