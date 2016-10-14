@@ -33,7 +33,7 @@ $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 25) btc/KB\n" 25)
 Stats
 -----
 Total connections:     $(printf "%4d" $(grep TCP $ELECTRUM_LOG | grep -vE "thread|server" | wc -l))
-Total sent txs:        $(grep "sent tx" $ELECTRUM_LOG | wc -l)
+Total sent txs:        $(printf "%4d" $(grep "sent tx" $ELECTRUM_LOG | wc -l))
 "Current" connections: $(printf "%4d" $(electrum-server numsessions))
 "Current" peers:       $(printf "%4d" $(electrum-server numpeers))
 bitcoind data:         $(printf "%4s" $(du -sh $BITCOIN_DATADIR | cut -f 1))
