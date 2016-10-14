@@ -32,12 +32,12 @@ $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 25) btc/KB\n" 25)
 
 Stats
 -----
-Total connections:     $(printf "%4d" $(grep TCP $ELECTRUM_LOG | grep -vE "thread|server" | wc -l))
-Total sent txs:        $(printf "%4d" $(grep "sent tx" $ELECTRUM_LOG | wc -l))
-"Current" connections: $(printf "%4d" $(electrum-server numsessions))
-"Current" peers:       $(printf "%4d" $(electrum-server numpeers))
-bitcoind data:         $(printf "%4s" $(du -sh $BITCOIN_DATADIR | cut -f 1))
-electrum-server data:  $(printf "%4s" $(du -sh $ELECTRUM_DATADIR | cut -f 1))
+$(printf "Total connections:    %4d" $(grep TCP $ELECTRUM_LOG | grep -vE "thread|server" | wc -l))
+$(printf "Total sent txs:       %4d" $(grep "sent tx" $ELECTRUM_LOG | wc -l))
+$(printf "Current connections:  %4d" $(electrum-server numsessions))
+$(printf "Current peers:        %4d" $(electrum-server numpeers))
+$(printf "bitcoind data:        %4s" $(du -sh $BITCOIN_DATADIR | cut -f 1))
+$(printf "electrum-server data: %4s" $(du -sh $ELECTRUM_DATADIR | cut -f 1))
 
 Donation address: $DONATION_ADDR
 or go to Help > Donate to server
