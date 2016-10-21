@@ -8,9 +8,29 @@ DONATION_ADDR="1MQS2nyvjFyqDjybiaz9KBdfxAFcsyDg87"
 ELECTRUM_LOG="/var/log/electrum.log"
 BITCOIN_DATADIR="/home/bitcoin/.bitcoin"
 ELECTRUM_DATADIR="/home/bitcoin/electrum-server"
+ELECTRUM_SRCDIR="/opt/electrum-server"
+ELECTRUM="$(which electrum-server)"
 
-# How to get num of sent tx:
-# grep "sent tx" $ELECTRUM_LOG | wc -l
+# VALUE is an int to fuzz
+# FACTOR is a int% to fuzz by
+# "fuzz 100 10" will return a value between 95 and 104
+function fuzz {
+	VALUE=$1
+	FACTOR=$((VALUE*$2/100))
+	(( "$FACTOR" == "0" )) && echo "$VALUE" && return
+	VALUE=$((VALUE-FACTOR/2))
+	AMOUNT=$((RANDOM%FACTOR))
+	echo $((VALUE+AMOUNT))
+}
+
+BTC_VERSION="$(bitcoind --version | head -n 1)"
+ELE_VERSION="$(cd $ELECTRUM_SRCDIR && git rev-parse --short HEAD) built $(stat -c '%y' $(which "$ELECTRUM") | date -uf - +'%d %b %Y')"
+TOTAL_CONNS=$(fuzz $(grep -E "TCP|SSL" $ELECTRUM_LOG | grep -cvE "thread|server") 10)
+TOTAL_SENT_TXS=$(fuzz $(grep -c "sent tx" $ELECTRUM_LOG) 10)
+CURR_CONNS=$(fuzz $("$ELECTRUM" numsessions) 10)
+CURR_PEERS=$(fuzz $("$ELECTRUM" numpeers) 0)
+BTC_DATA=$(du -sh $BITCOIN_DATADIR | cut -f 1)
+ELE_DATA=$(du -sh $ELECTRUM_DATADIR | cut -f 1)
 
 cat $HEADER
 cat << EOF
@@ -20,8 +40,8 @@ System
 ------
 Intel NUC running $(uname -o) $(uname -r)
 8GB RAM, 240GB SSD, 50/50 Mbps
-$(bitcoind --version | head -n 1)
-electrum-server $(cd /opt/electrum-server && git rev-parse HEAD | head -c 8) built $(stat -c '%y' $(which electrum-server) | date -uf - +'%d %b %Y')
+$BTC_VERSION
+electrum-server $ELE_VERSION
 
 Estimated fees
 --------------
@@ -32,12 +52,12 @@ $(printf "Within %2d blocks: $(bitcoin-cli estimatefee 25) btc/KB\n" 25)
 
 Stats
 -----
-$(printf "Total connections:    %4d" $(grep TCP $ELECTRUM_LOG | grep -vE "thread|server" | wc -l))
-$(printf "Total sent txs:       %4d" $(grep "sent tx" $ELECTRUM_LOG | wc -l))
-$(printf "Current connections:  %4d" $(electrum-server numsessions))
-$(printf "Current peers:        %4d" $(electrum-server numpeers))
-$(printf "bitcoind data:        %4s" $(du -sh $BITCOIN_DATADIR | cut -f 1))
-$(printf "electrum-server data: %4s" $(du -sh $ELECTRUM_DATADIR | cut -f 1))
+$(printf "Total connections:    %6d" $TOTAL_CONNS)
+$(printf "Total sent txs:       %6d" $TOTAL_SENT_TXS)
+$(printf "Current connections:  %6d" $CURR_CONNS)
+$(printf "Current peers:        %6d" $CURR_PEERS)
+$(printf "bitcoind data:        %6s" $BTC_DATA)
+$(printf "electrum-server data: %6s" $ELE_DATA)
 
 Donation address: $DONATION_ADDR
 or go to Help > Donate to server
