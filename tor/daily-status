@@ -1,0 +1,29 @@
+#!/bin/bash
+TOR_LOG=/home/tor/.tor1/log
+AUTH_LOG=/var/log/auth.log
+F2B_LOG=/var/log/fail2ban.log
+
+UPTIME=$(uptime)
+FREE=$(free -m)
+DF=$(df -h /)
+IFCONFIG=$(ifconfig eth0 | grep RX)
+TOR_HEARTBEATS=$(grep "$(date +'%b %d')" $TOR_LOG | grep Heartbeat | cut -d ' ' -f 4-)
+ROOT_LOGINS=$(grep "$(date +'%b %e')" $AUTH_LOG | grep Accepted | grep root | wc -l)
+F2B_SSH_BANS=$(grep "$(date +'%F')" $F2B_LOG | grep Ban | grep ssh | wc -l)
+
+cat << EOF
+Subject: $(date +'%F') $(hostname) status update
+
+$UPTIME
+
+$FREE
+
+$DF
+
+$IFCONFIG
+
+$TOR_HEARTBEATS
+
+Successfull root logins today: $ROOT_LOGINS
+fail2ban ssh bans today: $F2B_SSH_BANS
+EOF
