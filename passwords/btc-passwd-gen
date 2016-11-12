@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+DEF=4
+DEF_WORD_LIST="2048-bitcoin-words.txt"
+if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-?" ]]
+then
+	echo "$0 [num-words] [word-list-file]"
+	echo "default to $DEF words"
+	echo "default to $DEF_WORD_LIST"
+	exit 1
+fi
+
+[[ "$1" != "" ]] && NUM="$1" || NUM="$DEF"
+[[ "$2" != "" ]] && WORD_LIST="$2" || WORD_LIST="$DEF_WORD_LIST"
+
+sort -R "$WORD_LIST" | head -n $NUM | \
+while read W
+do
+	echo -n "$W"
+done 
+echo ""
+exit 0
