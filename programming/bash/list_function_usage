@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+if (( $# < 2 ))
+then
+cat << EOF
+Usage:
+$0 <func_name> <path> [path ...]
+
+Provide a bash function name and one or more paths to files/dirs containing bash
+scripts. 
+
+This script expects functions to be defined in the 'function foobar {' way.
+EOF
+exit 1
+fi
+
+func="$1"
+shift
+grep --recursive --word-regexp --line-number $func "$@" | grep -v \.git | sort --unique

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+if (( $# < 1 ))
+then
+cat << EOF
+Usage:
+$0 <path> [path ...]
+
+Provide one or more paths to files/dirs containing bash scripts. 
+
+This script expects functions to be defined in the 'function foobar {' way.
+
+It isn't perfect and may erroneously count too many things. So it's best to
+double check. I would only expect it to over count, never under count.
+EOF
+exit 1
+fi
+
+for func in $( grep --recursive "^function" "$@" 2>/dev/null | grep -vE ".*:#" | cut -d ' ' -f 2 | sort --unique )
+do
+	echo -n "$func "
+	grep --recursive --word-regexp --line-number $func "$@" | grep -v \.git | sort --unique | wc --lines
+done
