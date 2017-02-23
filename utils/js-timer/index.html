@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Super Timer</title>
+	<meta charset="utf-8"/>
+</head>
+<body>
+<h1>Super Timer</h1>
+<h2>It's super duper</h2>
+<p>
+	Time to next event:
+	<span id='hours'>0</span>h
+	<span id='minutes'>0</span>m
+	<span id='seconds'>0</span>s
+</p>
+<button id='start'>Start</button>
+<button id='pause'>Pause</button>
+<button id='reset'>Reset</button>
+<table id='times'>
+<tr><th>Hours</th><th>Minutes</th><th>Seconds</th></tr>
+</table>
+<script>
+var sound = new Audio("sound2.m4a");
+var table = document.getElementById("times");
+var start = document.getElementById("start");
+var pause = document.getElementById("pause");
+var reset = document.getElementById("reset");
+var hours_display = document.getElementById("hours");
+var minutes_display = document.getElementById("minutes");
+var seconds_display = document.getElementById("seconds");
+
+var States = Object.freeze({STARTED: 0, STOPPED: 1, PAUSED: 2});
+var state = States.STOPPED;
+var state_current_row = -1;
+
+var one_second_event;
+
+start.addEventListener("click", onStartClick, false);
+pause.addEventListener("click", onPauseClick, false);
+reset.addEventListener("click", onResetClick, false);
+
+addRowToTable();
+
+function addRowToTable(atIndex) {
+	var row = table.insertRow(atIndex);
+	var cell = row.insertCell();
+	cell.innerHTML = "<input type='number' min='0' max='420' value='0'/>";
+	cell = row.insertCell();
+	cell.innerHTML = "<input type='number' min='0' max='59' value='0'/>";
+	cell = row.insertCell();
+	cell.innerHTML = "<input type='number' min='0' max='59' value='0'/>";
+	cell = row.insertCell();
+	cell.appendChild(createAddRowButton());
+	cell = row.insertCell();
+	cell.appendChild(createDeleteRowButton());
+}
+
+function createAddRowButton() {
+	var b = document.createElement("button");
+	b.innerHTML = "+";
+	b.type = "button";
+	b.addEventListener("click", onAddRowButtonClick, false);
+	return b;
+}
+
+function createDeleteRowButton() {
+	var b = document.createElement("button");
+	b.innerHTML = "-";
+	b.type = "button";
+	b.addEventListener("click", onDeleteRowButtonClick, false);
+	return b;
+}
+function onAddRowButtonClick(event) {
+	var row = event.target.parentElement.parentElement;
+	console.log(row);
+	addRowToTable(row.rowIndex+1);
+}
+function onDeleteRowButtonClick(event) {
+	var row = event.target.parentElement.parentElement;
+	// one row is for headers, second row is the only body row
+	if (row.parentElement.rows.length <= 2) { return; }
+	row.parentElement.removeChild(row);
+}
+function onStartClick(event) {
+	if (state == States.STARTED) return;
+
+	if (state == States.STOPPED) state_current_index = 1;
+	else if (state_current_index < 1) state_current_index = 1;
+
+	if (state == States.STOPPED) {
+		state = States.STARTED;
+		var h = getCurrentTimerHour();
+		var m = getCurrentTimerMinute();
+		var s = getCurrentTimerSecond();
+		setTimeDisplay(h, m, s);
+		changeHighlightedRow();
+		one_second_event = setInterval(oneSecondCallback, 1000);
+	} else if (state == States.PAUSED) {
+		state = States.STARTED;
+		one_second_event = setInterval(oneSecondCallback, 1000);
+	}
+}
+function onPauseClick(event) {
+	if (state != States.STARTED) return;
+	state = States.PAUSED;
+	clearInterval(one_second_event);
+}
+function onResetClick(event) {
+	state = States.STOPPED;
+	state_current_index = -1;
+	clearInterval(one_second_event);
+	setTimeDisplay(0, 0, 0);
+	changeHighlightedRow();
+}
+function setTimeDisplay(h, m, s) {
+	hours_display.innerHTML = h;
+	minutes_display.innerHTML = m;
+	seconds_display.innerHTML = s;
+}
+/*
+ * Returns True if time is still left, otherwise False
+ */
+function decrementTimeDisplay() {
+	h = parseInt(hours_display.innerHTML);
+	m = parseInt(minutes_display.innerHTML);
+	s = parseInt(seconds_display.innerHTML);
+	s -= 1;
+	if (s < 0) {
+		m -= 1;
+		s += 60;
+	}
+	if (m < 0) {
+		h -= 1;
+		m += 60
+	}
+	if (h < 0) return false;
+	setTimeDisplay(h, m, s);
+	return true;
+}
+function oneSecondCallback() {
+	if (!decrementTimeDisplay()) {
+		// ran out of time
+		sound.play();
+		state_current_index += 1;
+		if (state_current_index >= table.rows.length) {
+			state = States.STOPPED;
+			state_current_index = -1;
+			clearInterval(one_second_event);
+		} else {
+			var h = getCurrentTimerHour();
+			var m = getCurrentTimerMinute();
+			var s = getCurrentTimerSecond();
+			setTimeDisplay(h, m, s);
+			changeHighlightedRow();
+		}
+	} else {
+		// still more time
+		changeHighlightedRow();
+	}
+}
+function getCurrentTimerHour() {
+	if (state_current_index < 1) return 0;
+	var row = table.rows[state_current_index];
+	var h = parseInt(row.cells[0].firstChild.value);
+	return h;
+}
+function getCurrentTimerMinute() {
+	if (state_current_index < 1) return 0;
+	var row = table.rows[state_current_index];
+	var m = parseInt(row.cells[1].firstChild.value);
+	return m;
+}
+function getCurrentTimerSecond() {
+	if (state_current_index < 1) return 0;
+	var row = table.rows[state_current_index];
+	var s = parseInt(row.cells[2].firstChild.value);
+	return s;
+}
+function changeHighlightedRow() {
+	for (var i = 0; i < table.rows.length; i++) {
+		var row = table.rows[i];
+		row.style.backgroundColor = "";
+	}
+	if (state_current_index > 0)
+		table.rows[state_current_index].style.backgroundColor =
+			rainbow(num_color_steps, Math.floor(Math.random()*num_color_steps));
+}
+/* Fun unnecessary stuff */
+var num_color_steps = 1000;
+var color_step = 0;
+function rainbow(numOfSteps, step) {
+	// https://stackoverflow.com/a/7419630
+    var r, g, b;
+    var h = step / numOfSteps;
+    var i = ~~(h * 6);
+    var f = h * 6 - i;
+    var q = 1 - f;
+    switch(i % 6){
+        case 0: r = 1; g = f; b = 0; break;
+        case 1: r = q; g = 1; b = 0; break;
+        case 2: r = 0; g = 1; b = f; break;
+        case 3: r = 0; g = q; b = 1; break;
+        case 4: r = f; g = 0; b = 1; break;
+        case 5: r = 1; g = 0; b = q; break;
+    }
+    var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) +
+		("00" + (~ ~(g * 255)).toString(16)).slice(-2) +
+		("00" + (~ ~(b * 255)).toString(16)).slice(-2);
+    return (c);
+}
+</script>
+<style type="text/css">
+body {
+	max-width: 800px;
+	margin: auto;
+	background-color: #eee;
+	font-family: monospace;
+}
+p {
+	font-size: large;
+}
+button {
+	min-width: 30px;
+}
+</style>
+</body>
+</html>
